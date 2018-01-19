@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+  clickhouse:
+    image: yandex/clickhouse-server
+    expose:
+      - 8123
+      - 9000
+    ports:
+      - 9000:9000
+      - 8123:8123
+    volumes:
+      - ./clickhouse-config.xml:/etc/clickhouse-server/config.xml
+
+  graphite-clickhouse:
+    image: mosquito/graphite-clickhouse
+    links:
+      - clickhouse
+    environment:
+      CLICKHOUSE_URL: http://clickhouse:8123
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    volumes:
+      - ./rollup.xml:/etc/graphite-clickhouse/rollup.xml
+
+  carbon-clickhouse:
+    image: mosquito/carbon-clickhouse
+    environment:
+      CLICKHOUSE_URL: http://clickhouse:8123
+    links:
+      - clickhouse
+    ports:
+      - 2003/udp
+      - 2003
+      - 2004
+      - 2005
+    volumes:
+      - ./data:/data
+    expose:
+      - 2003/udp
+      - 2003
+      - 2004
+      - 2005
+
+  carbonapi:
+    image: mosquito/carbonapi
+    ports:
+      - 8080:8080
+    links:
+      - graphite-clickhouse
+    environment:
+      CONCURENCY: 20
+      CACHE_TYPE: mem
+      UPSTREAMS_BACKENDS: http://graphite-clickhouse:9090/
+      LOGGER_FILE: stdout
+      LISTEN: "0.0.0.0:8080"
+
+  tabix:
+    image: spoonest/clickhouse-tabix-web-client
+    links:
+      - clickhouse
+    ports:
+      - 8090:80
+
+  grafana:
+    image: grafana/grafana
+    links:
+      - carbonapi
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    environment:
+      GF_SERVER_ROOT_URL: http://127.0.0.1:3000
+      GF_SECURITY_ADMIN_PASSWORD: secret
+
