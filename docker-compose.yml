@@ -54,7 +54,6 @@ services:
       CONCURENCY: 20
       CACHE_TYPE: mem
       UPSTREAMS_BACKENDS: http://graphite-clickhouse:9090/
-      LOGGER_FILE: stdout
       LISTEN: "0.0.0.0:8080"
 
   tabix:
