@@ -11,6 +11,7 @@ services:
       - 8123:8123
     volumes:
       - ./clickhouse-config.xml:/etc/clickhouse-server/config.xml
+      - ./users.xml:/etc/clickhouse-server/users.xml
 
   graphite-clickhouse:
     image: mosquito/graphite-clickhouse
