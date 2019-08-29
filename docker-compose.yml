@@ -45,6 +45,20 @@ services:
       - 2004
       - 2005
 
+#https://github.com/grobian/carbon-c-relay
+  carbon-c-relay:
+    image: bodsch/docker-carbon-c-relay
+    links:
+      - carbon-clickhouse
+    volumes:
+      - ./carbon-c-relay.conf:~/carbon-c-relay.conf
+    ports:
+      - 2003/udp
+      - 2003
+    expose:
+      - 2004/udp
+      - 2004
+
   carbonapi:
     image: mosquito/carbonapi
     ports:
